@@ -8,18 +8,13 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    2: typeof import('./components/CanvasLottery copy 2.vue')['default']
     CanvasLottery: typeof import('./components/CanvasLottery.vue')['default']
     'CanvasLottery copy': typeof import('./components/CanvasLottery copy.vue')['default']
     'CanvasLottery copy 2': typeof import('./components/CanvasLottery copy 2.vue')['default']
-    copy: typeof import('./components/WinnerTable copy.vue')['default']
     Dialog: typeof import('./components/Dialog.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElConfigProvider: typeof import('element-plus/es')['ElConfigProvider']
     ElDialog: typeof import('element-plus/es')['ElDialog']
-    ElDropdown: typeof import('element-plus/es')['ElDropdown']
-    ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
-    ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
     ElEmpty: typeof import('element-plus/es')['ElEmpty']
     ElForm: typeof import('element-plus/es')['ElForm']
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
