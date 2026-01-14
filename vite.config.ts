@@ -12,6 +12,9 @@ import { defineConfig } from 'vite'
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/lottery',
+  build: {
+    outDir: 'docs',
+  },
   resolve: {
     alias: {
       // '~/': `${path.resolve(__dirname, 'src')}/`,
