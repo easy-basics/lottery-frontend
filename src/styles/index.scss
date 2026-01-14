@@ -1,0 +1,104 @@
+// import dark theme
+@use 'element-plus/theme-chalk/src/dark/css-vars.scss' as *;
+
+// :root {
+//   --ep-color-primary: red;
+// }
+
+body {
+  font-family:
+    Inter, system-ui, Avenir, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    '微软雅黑', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+}
+
+a {
+  color: var(--ep-color-primary);
+}
+
+code {
+  border-radius: 2px;
+  padding: 2px 4px;
+  background-color: var(--ep-color-primary-light-9);
+  color: var(--ep-color-primary);
+}
+
+#nprogress {
+  pointer-events: none;
+}
+
+#nprogress .bar {
+  background: rgb(13, 148, 136);
+  opacity: 0.75;
+  position: fixed;
+  z-index: 1031;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+}
+
+// 加深表头颜色样式
+// .active-table {
+//   .ep-table__inner-wrapper {
+//     border: 1px solid var(--ep-border-color);
+//     border-radius: 10px;
+//     overflow: hidden;
+//     box-sizing: border-box;
+//     &::before{
+//       background-color:rgba(0,0,0,0)
+//     }
+//   }
+//   .ep-table__header-wrapper {
+//     // border: 1px solid #dcdfe6;
+//     .ep-table__header {
+//       th, th.ep-table-fixed-column--left,th.ep-table-fixed-column--right {
+//         // 设置表头背景色为更深的颜色
+//         background-color: #eef1f6;
+//         // 设置表头文字颜色
+//         color: #333;
+//         // 可选：设置表头边框颜色
+//         border-bottom-color: #dcdfe6;
+//         height: 50px;
+//       }
+//     }
+//   }
+//   .ep-table__body{
+//     >tbody>tr:nth-last-child(1){
+//       td.ep-table__cell{
+//         border-bottom: none;
+//       }
+//     }
+//   }
+// }
+
+.active-table-v2{
+// box-sizing: border-box;
+  .ep-table-v2__table{
+    border-radius: 10px;
+    // overflow: hidden;
+    border: 1px solid var(--ep-border-color);
+    box-sizing: border-box;
+    
+  }
+  .ep-table-v2__header-cell,.ep-table-v2__header-row,.ep-table-v2__header-wrapper{
+    // 设置表头背景色为更深的颜色
+        background-color: #eef1f6;
+        // 设置表头文字颜色
+        color: #333;
+        // 可选：设置表头边框颜色
+        border-bottom-color: #dcdfe6;
+        // height: 50px;
+  }
+  .ep-table-v2__body{
+    .ep-table-v2__row:nth-last-child(1){
+      border-bottom: none;
+      // td.ep-table-v2__cell{
+      //   border-bottom: none;
+      // }
+    }
+  }
+
+}
