@@ -6,15 +6,6 @@ import { toggleDark } from '@/composables'
 <template>
   <div class="header-wrap">
     <div class="head-title">Lottery Admin</div>
-    <!-- <el-dropdown :show-timeout="0" :hide-timeout="0">
-      <img src="https://internal-api-lark-file.rwork.crc.com.cn/static-resource/v1/v3_00o1_2982eee3-3d63-4389-b4ff-742b669b390p~?image_size=640x640&cut_type=&quality=&format=image&sticker_format=.webp" alt="" class="avatar-style" />
-      <template #dropdown>
-        <el-dropdown-menu>
-          <el-dropdown-item>退出登录</el-dropdown-item>
-        </el-dropdown-menu>
-      </template>
-    </el-dropdown> -->
-    
   </div>
 </template>
 

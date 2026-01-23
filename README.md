@@ -1,45 +1,4 @@
-# element-plus-vite-starter
+# 幸运抽奖系统，纯前端方案
+简介：基于 Vue3 + Element Plus + Dexie 实现的幸运抽奖系统，无需后端支持，纯前端方案。你的数据只会存储在浏览器的 IndexedDB 中，不会被发送到服务器。
 
-> A starter kit for Element Plus with Vite
 
-- Preview: <https://vite-starter.element-plus.org>
-
-This is an example of on-demand element-plus with [unplugin-vue-components](https://github.com/antfu/unplugin-vue-components).
-
-> If you want to import all, it may be so simple that no examples are needed. Just follow [quickstart | Docs](https://element-plus.org/zh-CN/guide/quickstart.html) and import them.
-
-If you just want an on-demand import example `manually`, you can check [unplugin-element-plus/examples/vite](https://github.com/element-plus/unplugin-element-plus/tree/main/examples/vite).
-
-If you want to a nuxt starter, see [element-plus-nuxt-starter](https://github.com/element-plus/element-plus-nuxt-starter/).
-
-## Project setup
-
-```bash
-pnpm install
-
-# npm install
-# yarn install
-```
-
-### Compiles and hot-reloads for development
-
-```bash
-pnpm run dev
-```
-
-### Compiles and minifies for production
-
-```bash
-pnpm run build
-```
-
-## Usage
-
-```bash
-pnpm i
-pnpm run dev
-```
-
-### Custom theme
-
-See `src/styles/element/index.scss`.

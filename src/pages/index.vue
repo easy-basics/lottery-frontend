@@ -197,8 +197,10 @@ onMounted(() => {
 const getLotteryInfo = () => {
   const lotteryKey = route.query.lotteryKey
   if (!lotteryKey) {
-    ElMessageBox.alert(`当前链接有误`, '温馨提示', {
+    ElMessageBox.alert(`未配置抽奖活动，前往管理后台配置活动`, '温馨提示', {
       confirmButtonText: '确定',
+    }).then(res => {
+      router.replace({ name: 'lotteryActivity' })
     })
     return
   }
