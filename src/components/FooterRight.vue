@@ -15,7 +15,7 @@
             <span class="text-white text-lg font-semibold">幸运抽奖系统</span>
           </div>
           <p class="text-purple-200 text-sm">
-            © 2026 幸运抽奖系统 版权所有
+            © {{ yearNow }} 幸运抽奖系统 版权所有
           </p>
           <p class="text-purple-300 text-xs mt-1">
             打造最公平、最有趣的抽奖体验
@@ -82,8 +82,8 @@
         <div class="text-center">
           <p class="text-purple-300/80 text-xs">
             本系统采用随机的抽奖算法，确保公平公正 |
-            <span class="text-purple-200 font-medium">版本 v2.1.0</span> |
-            最后更新: 2026-01-09
+            <span class="text-purple-200 font-medium">版本 v1.1.0</span> |
+            最后更新: 2026-01-23
           </p>
         </div>
       </div>
@@ -95,9 +95,11 @@
   </footer>
 </template>
 <script setup lang="ts">
-  import { useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
+import { dayjs } from 'element-plus'
 
-  const router = useRouter()
+const router = useRouter()
+  const yearNow = dayjs().year()
 
   const handleClickAdmin = () => {
     router.replace({ name: 'lotteryActivity' })

@@ -35,9 +35,7 @@
           <span class="text-yellow-300 font-semibold text-xl">{{ prize.prizeNum }} 份</span>
           <button
             @click="goToLottery(index)"
-            :disabled="prize.isOver"
-            :class="!prize.isOver ? 'cursor-pointer' : 'cursor-not-allowed'"
-            class="px-4 py-2 bg-gradient-to-r from-purple-500 to-violet-500 text-white text-sm font-medium rounded-full hover:from-purple-600 hover:to-violet-600 transition-all duration-300">
+            class="px-4 py-2 bg-gradient-to-r from-purple-500 to-violet-500 text-white text-sm font-medium rounded-full hover:from-purple-600 hover:to-violet-600 transition-all duration-300 cursor-pointer">
             {{ prize.isOver ? '已结束' : '前往抽奖' }}
           </button>
         </div>

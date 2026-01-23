@@ -1,13 +1,13 @@
 <template>
   <div class="big-screen">
-    <div class="header">
+    <!-- <div class="header">
       <h1 class="main-title">{{ prizeInfo.title || '幸运大抽奖'}}</h1>
       <div class="main-desc" v-if="prizeInfo.desc">{{ prizeInfo.desc}}</div>
-    </div>
+    </div> -->
 
       <div class="main-area">
         <CanvasLottery ref="lotteryRef" :participants="userList" :winner-count="prizeInfo.prizeNum" theme-color="#FF8C00"
-          @finished="onLotteryFinished"  v-if="userList.length > 0"/>
+          @finished="onLotteryFinished"  v-if="userList.length > 0" :mainTitle="prizeInfo.title || '幸运大抽奖'" :subTitle="prizeInfo.desc || ''"  :initialWinners="prizeInfo.prizeUserList || []" />
         <el-empty v-else description="请先添加员工" />
       </div>
 
@@ -25,19 +25,9 @@
       </el-button>
     </div>
     <div class="footer-actions" v-else>
-      <el-button type="danger" size="large" @click="handleReturn" class="action-btn stop">
-        返回
-      </el-button>
+      <el-button  size="large" link @click="handleReturn"  class="action-btn stop" :icon="ArrowLeftBold"  color="#000">返回</el-button>
+      <el-button type="danger" size="large" @click="downloadSnapshot" class="action-btn stop">导出中奖图片</el-button>
     </div>
-
-    
-
-    <!-- <el-dialog v-model="showResult" title="中奖名单" width="500px" center>
-      <el-table :data="winnerResults" max-height="400">
-        <el-table-column property="name" label="姓名" />
-        <el-table-column property="id" label="工号" />
-      </el-table>
-    </el-dialog> -->
   </div>
 </template>
 
@@ -47,9 +37,11 @@ import CanvasLottery from '@/components/CanvasLottery.vue';
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { queryLottery, deleteLottery, updateLottery } from '@/utils/indexedDB'
+import { ArrowLeftBold } from '@element-plus/icons-vue'
 const route = useRoute()
 const router = useRouter()
 const userList = shallowRef([])
+const historyWinners = ref([]); // 如果已经抽过了，存入这里实现回显
 // const isOver = ref(false)
 
 const prizeInfo = reactive({
@@ -85,19 +77,13 @@ const getLotteryInfo = () => {
     if (res?.success) {
       const { lotteryPrize, lotteryUser, status } = res.data[0]
       const prizeNowInfo = lotteryPrize[Number(prizeIndex)]
-      if (prizeNowInfo.isOver) {
-        ElMessageBox.alert(`当前奖项已抽完`, '温馨提示', {
-          confirmButtonText: '确定',
-        }).then(() => {
-          router.replace({
-            path: '/',
-            query: {
-              lotteryKey: route.query.lotteryKey,
-            }
-          })
-        })
-        return
-      }
+      prizeInfo.title = prizeNowInfo.title
+      prizeInfo.desc = prizeNowInfo.desc
+      prizeInfo.prizeNum = prizeNowInfo.prizeNum
+      prizeInfo.prizeUserList = prizeNowInfo.prizeUserList
+      prizeInfo.isOver = prizeNowInfo.isOver
+
+      setUserList(res.data[0], prizeNowInfo)
       if (!status) {
         ElMessageBox.alert(`当前抽奖活动未开始`, '温馨提示', {
           confirmButtonText: '确定',
@@ -111,13 +97,21 @@ const getLotteryInfo = () => {
         })
         return
       }
-      prizeInfo.title = prizeNowInfo.title
-      prizeInfo.desc = prizeNowInfo.desc
-      prizeInfo.prizeNum = prizeNowInfo.prizeNum
-      setUserList(res.data[0], prizeNowInfo)
+      
     }
   })
 }
+
+// 导出中奖图片
+const downloadSnapshot = () => {
+  const dataUrl = lotteryRef.value.exportImage();
+  if (dataUrl) {
+    const link = document.createElement('a');
+    link.download = `${prizeInfo.title || '中奖名单'}_${new Date().getTime()}.png`;
+    link.href = dataUrl;
+    link.click();
+  }
+};
 
 const setUserList = (data, prizeNowInfo) => {
   if (['是', true].includes(prizeNowInfo.isDeduplication)) {
@@ -189,9 +183,9 @@ const savePrizeInfo = (results) => {
         key: lotteryKey,
         lotteryPrize,
       }).then(res => {
-        if (res?.success) {
-          ElMessage.success('保存成功')
-        }
+        // if (res?.success) {
+        //   ElMessage.success('保存成功')
+        // }
       })
     }
   })

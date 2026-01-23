@@ -5,24 +5,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
+import { ref, onMounted, onBeforeUnmount, defineExpose, nextTick } from 'vue';
 
 const props = defineProps({
-  // 参与者总列表: Array<{ name: string, id: string }>
-  participants: {
-    type: Array,
-    default: () => []
-  },
-  // 需要抽取的获奖人数
-  winnerCount: {
-    type: Number,
-    default: 1
-  },
-  // 基础主题色
-  themeColor: {
-    type: String,
-    default: '#FF8C00'
-  }
+  participants: { type: Array, default: () => [] },
+  winnerCount: { type: Number, default: 1 },
+  themeColor: { type: String, default: '#FF8C00' },
+  // 新增功能 1 & 2 的 Props
+  mainTitle: { type: String, default: '' },
+  subTitle: { type: String, default: '' },
+  initialWinners: { type: Array, default: () => [] } // 用于回显中奖名单
 });
 
 const emit = defineEmits(['finished']);
@@ -35,13 +27,15 @@ let slots = [];
 let isRunning = false;
 let isStopping = false;
 
-// 1. 槽位类：管理单个奖窗的状态
+// 预留顶部标题高度比例
+const HEADER_HEIGHT_RATIO = 0.15;
+
 class Slot {
-  constructor(x, y, w, h) {
+  constructor(x, y, w, h, user = null) {
     this.updateRect(x, y, w, h);
-    this.currentUser = { name: '等待开奖', id: '****' };
+    this.currentUser = user || { name: '等待开奖', ldap: '****' };
     this.targetUser = null;
-    this.state = 'idle'; // idle | rolling | stopping | locked
+    this.state = user ? 'locked' : 'idle'; // 如果初始化有用户，直接锁定
     this.speed = 20;
     this.lastUpdate = 0;
     this.stopDelay = 0;
@@ -73,11 +67,10 @@ class Slot {
 
   draw(ctx, themeColor) {
     const { x, y, w, h } = this;
-    const padding = 8; // 稍微减小边距，给文字留出更多空间
+    const padding = 8;
 
-    // 1. 绘制卡片背景和边框
     ctx.save();
-    ctx.shadowBlur = this.state === 'locked' ? 15 : 0; // 仅中奖后开启外发光，减少平时性能开销
+    ctx.shadowBlur = this.state === 'locked' ? 15 : 0;
     ctx.shadowColor = themeColor;
 
     const grad = ctx.createLinearGradient(x, y, x, y + h);
@@ -93,25 +86,18 @@ class Slot {
     ctx.stroke();
     ctx.restore();
 
-    // 2. 绘制文字内容
     ctx.save();
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    // --- 关键调整区 ---
-
-    // 姓名：比例从 0.25 降至 0.15，位置微调
     const nameSize = Math.floor(h * 0.15);
     ctx.font = `bold ${nameSize}px "Microsoft YaHei", sans-serif`;
     ctx.fillStyle = this.state === 'locked' ? themeColor : '#FFFFFF';
-    // 名字放在格子上部 42% 的位置
     ctx.fillText(this.currentUser.name, x + w / 2, y + h * 0.42);
 
-    // 工号：比例从 0.15 降至 0.11，颜色稍微减淡
     const idSize = Math.floor(h * 0.08);
-    ctx.font = `${idSize}px "Consolas", "Monaco", monospace`;
+    ctx.font = `${idSize}px "Consolas", monospace`;
     ctx.fillStyle = this.state === 'locked' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.45)';
-    // 工号放在下部 62% 的位置，保持与名字的间距
     ctx.fillText(`${this.currentUser.ldap || '***'}`, x + w / 2, y + h * 0.62);
 
     ctx.restore();
@@ -125,63 +111,118 @@ class Slot {
   }
 }
 
-// 2. 初始化布局：根据中奖人数自动计算行列
-// 修改 CanvasLottery.vue 中的 initLayout 方法
+// 绘制主副标题
+const drawHeader = (rect) => {
+  if (!props.mainTitle && !props.subTitle) return;
+
+  ctx.save();
+  ctx.textAlign = 'center';
+
+  // 主标题
+  const mainFontSize = Math.min(rect.width * 0.04, 40);
+  ctx.font = `bold ${mainFontSize}px "Microsoft YaHei"`;
+  ctx.fillStyle = props.themeColor;
+  ctx.fillText(props.mainTitle, rect.width / 2, rect.height * 0.06);
+
+  // 副标题
+  const subFontSize = mainFontSize * 0.6;
+  ctx.font = `${subFontSize}px "Microsoft YaHei"`;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  ctx.fillText(props.subTitle, rect.width / 2, rect.height * 0.11);
+
+  ctx.restore();
+};
+
 const initLayout = () => {
   if (!canvasRef.value || !container.value) return;
   const rect = container.value.getBoundingClientRect();
   const dpr = window.devicePixelRatio || 1;
 
-  // 1. 同步物理像素，防止 4K 模糊
   canvasRef.value.width = rect.width * dpr;
   canvasRef.value.height = rect.height * dpr;
   ctx.scale(dpr, dpr);
 
-  // 2. 动态布局算法：根据当前容器的宽高比，计算最整齐的网格
   const count = props.winnerCount;
-  const containerRatio = rect.width / rect.height;
+  // 核心修改：减去标题占用的高度
+  const availableHeight = rect.height * (1 - HEADER_HEIGHT_RATIO);
+  const startY = rect.height * HEADER_HEIGHT_RATIO;
 
-  // 核心公式：寻找最接近容器比例的行列组合
+  const containerRatio = rect.width / availableHeight;
   let cols = Math.ceil(Math.sqrt(count * containerRatio));
   let rows = Math.ceil(count / cols);
 
-  // 二次校验：如果行数过多导致超出高度，则减少列数增加行数
   const slotW = rect.width / cols;
-  const slotH = rect.height / rows;
+  const slotH = availableHeight / rows;
 
   slots = [];
   for (let i = 0; i < count; i++) {
     const r = Math.floor(i / cols);
     const c = i % cols;
-
-    // 居中偏移量计算：如果最后一行不满，让它居中显示
     const currentRowCount = (r === rows - 1) ? (count % cols || cols) : cols;
     const offsetX = (rect.width - currentRowCount * slotW) / 2;
 
-    slots.push(new Slot(c * slotW + offsetX, r * slotH, slotW, slotH));
+    // 回显逻辑：如果 initialWinners 存在对应索引的数据，直接传入
+    const echoUser = props.initialWinners[i] || null;
+    slots.push(new Slot(c * slotW + offsetX, r * slotH + startY, slotW, slotH, echoUser));
   }
 };
 
-const render = (now) => {
-  ctx.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height);
-  let allLocked = true;
+// const render = (now) => {
+//   const rect = container.value.getBoundingClientRect();
+//   ctx.clearRect(0, 0, rect.width, rect.height);
 
+//   drawHeader(rect);
+
+//   let allLocked = true;
+//   slots.forEach(s => {
+//     s.update(now, props.participants);
+//     s.draw(ctx, props.themeColor);
+//     if (s.state !== 'locked') allLocked = false;
+//   });
+
+//   if (isStopping && allLocked) {
+//     isRunning = false;
+//     isStopping = false;
+//     emit('finished', slots.map(s => s.targetUser));
+//   }
+//   animationId = requestAnimationFrame(render);
+// };
+
+const render = (now) => {
+  if (!canvasRef.value || !container.value) return;
+
+  const rect = container.value.getBoundingClientRect();
+  const canvas = canvasRef.value;
+
+  // 1. 绘制底色背景（核心修改点）
+  // 注意：我们需要先重置一下变换，确保填充的是整个物理像素区域，然后再恢复
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0); // 重置缩放/位移
+  ctx.fillStyle = '#000000';         // 设置背景颜色
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.restore();
+
+  // 2. 绘制标题
+  drawHeader(rect);
+
+  // 3. 绘制槽位
+  let allLocked = true;
   slots.forEach(s => {
     s.update(now, props.participants);
     s.draw(ctx, props.themeColor);
     if (s.state !== 'locked') allLocked = false;
   });
 
+  // 4. 状态判断
   if (isStopping && allLocked) {
     isRunning = false;
     isStopping = false;
     emit('finished', slots.map(s => s.targetUser));
-    return;
   }
+
   animationId = requestAnimationFrame(render);
 };
 
-// 3. 对外暴露的方法
 const start = () => {
   if (isRunning) return;
   isRunning = true;
@@ -195,8 +236,6 @@ const start = () => {
 const stop = () => {
   if (!isRunning || isStopping) return;
   isStopping = true;
-
-  // 核心逻辑：完全随机抽取
   const winners = [...props.participants]
     .sort(() => Math.random() - 0.5)
     .slice(0, props.winnerCount);
@@ -206,11 +245,18 @@ const stop = () => {
     s.targetUser = winners[i];
     s.state = 'stopping';
     s.stopStartTime = now;
-    s.stopDelay = i * 150 + Math.random() * 200; // 阶梯式停止
+    s.stopDelay = i * 150 + Math.random() * 200;
   });
 };
 
-defineExpose({ start, stop });
+// 新增功能 3：导出图片方法
+const exportImage = () => {
+  if (!canvasRef.value) return null;
+  // 如果需要包含背景色，可以在导出前临时绘制一个底层背景
+  return canvasRef.value.toDataURL('image/png');
+};
+
+defineExpose({ start, stop, exportImage });
 
 onMounted(() => {
   ctx = canvasRef.value.getContext('2d');

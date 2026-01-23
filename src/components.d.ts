@@ -9,8 +9,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     CanvasLottery: typeof import('./components/CanvasLottery.vue')['default']
-    'CanvasLottery copy': typeof import('./components/CanvasLottery copy.vue')['default']
-    'CanvasLottery copy 2': typeof import('./components/CanvasLottery copy 2.vue')['default']
     Dialog: typeof import('./components/Dialog.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElConfigProvider: typeof import('element-plus/es')['ElConfigProvider']
