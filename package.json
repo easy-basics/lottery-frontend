@@ -15,7 +15,8 @@
     "generate": "vite-ssg build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "build:tar": "tar -cvf dist.tar dist"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
