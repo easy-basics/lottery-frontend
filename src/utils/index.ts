@@ -60,3 +60,19 @@ export const getPrizeUserList = (lotteryPrize) => {
   })
   return PrizeUser
 }
+
+/**
+ * 数组乱序（Fisher-Yates Shuffle 算法）
+ * 时间复杂度 O(n)，适用于大数据量（如 10000+ 条）
+ * @param arr 需要乱序的数组
+ * @returns 乱序后的新数组（不影响原数组）
+ */
+export function shuffle<T>(arr: T[]): T[] {
+  const newArr = arr.slice()
+  for (let i = newArr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArr[i], newArr[j]] = [newArr[j], newArr[i]]
+  }
+  return newArr
+}
+

@@ -37,6 +37,7 @@ import CanvasLottery from '@/components/CanvasLottery.vue';
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { queryLottery, deleteLottery, updateLottery } from '@/utils/indexedDB'
+import { shuffle } from '@/utils/index'
 import { ArrowLeftBold } from '@element-plus/icons-vue'
 const route = useRoute()
 const router = useRouter()
@@ -115,7 +116,7 @@ const downloadSnapshot = () => {
 
 const setUserList = (data, prizeNowInfo) => {
   if (['是', true].includes(prizeNowInfo.isDeduplication)) {
-    userList.value = data.lotteryUser
+    userList.value = shuffle(data.lotteryUser)
     return
   } 
 
@@ -125,8 +126,7 @@ const setUserList = (data, prizeNowInfo) => {
       havePrizeUserList.push(user.ldap)
     })
   })
-
-  userList.value = filterUsers(data.lotteryUser, havePrizeUserList);
+  userList.value = shuffle(filterUsers(data.lotteryUser, havePrizeUserList));
 }
 
 // 过滤出未中奖用户，已中奖的用户不再参与抽奖
