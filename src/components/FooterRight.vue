@@ -82,8 +82,8 @@
         <div class="text-center">
           <p class="text-purple-300/80 text-xs">
             本系统采用随机的抽奖算法，确保公平公正 |
-            <span class="text-purple-200 font-medium">版本 v1.1.0</span> |
-            最后更新: 2026-01-23
+            <span class="text-purple-200 font-medium">版本 v1.2.0</span> |
+            最后更新: 2026-03-03
           </p>
         </div>
       </div>
